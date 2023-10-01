@@ -10,6 +10,7 @@
       my-python-packages = ps: with ps; [
         pandas
         numpy
+        pycryptodome
       ];
     in
     {

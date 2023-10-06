@@ -8,9 +8,9 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
       my-python-packages = ps: with ps; [
-        pandas
         numpy
         pycryptodome
+        icecream
       ];
     in
     {

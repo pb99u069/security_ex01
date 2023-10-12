@@ -27,10 +27,10 @@ def runSym():
         runAES_GCM()
 
 def runECB():
-    choice = input("encrypt or decrypt? ")
-    if choice.upper() == 'ENCRYPT':
+    choice = input("e for encrypt, d for decrypt? ")
+    if choice.upper() == 'E':
         run_ecb_encrypt()
-    elif choice.upper() == 'DECRYPT':
+    elif choice.upper() == 'D':
         run_ecb_decrypt()
 
 def run_ecb_encrypt():
@@ -55,10 +55,10 @@ def run_ecb_decrypt():
     print(plaintext)
     
 def runCBC():
-    choice = input("encrypt or decrypt? ")
-    if choice.upper() == 'ENCRYPT':
+    choice = input("e for encrypt, d for decrypt? ")
+    if choice.upper() == 'E':
         run_cbc_encrypt()
-    elif choice.upper() == 'DECRYPT':
+    elif choice.upper() == 'D':
         run_cbc_decrypt()
 
 def run_cbc_encrypt():
@@ -74,19 +74,12 @@ def run_cbc_encrypt():
     ct = b64encode(ct_bytes).decode('utf-8')
     result = json.dumps({'iv': iv, 'ciphertext': ct})
     print(result)
-
-    file_out = open('result.json', 'w')
-    file_out.write(result)
-    file_out.close()
+    write_json(result)
 
 def run_cbc_decrypt():
     print('decrypt file in cbc mode')
     key = get_key()
-
-    file_in = open('result.json', "r")
-    result = file_in.read()
-    file_in.close()
-
+    result = get_json()
     b64 = json.loads(result)
     iv = b64decode(b64['iv'])
     ct = b64decode(b64['ciphertext'])
@@ -124,6 +117,19 @@ def write_data(data):
     data_file = input("name of data file: ")
     file_out = open(data_file, 'wb')
     file_out.write(data)
+    file_out.close()
+
+def get_json():
+    file = input('what file to read from? ')
+    file_in = open(file, "r")
+    result = file_in.read()
+    file_in.close()
+    return result
+
+def write_json(result):
+    file = input('what file to save to? ')
+    file_out = open(file, 'w')
+    file_out.write(result)
     file_out.close()
 
 def get_key():

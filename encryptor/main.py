@@ -18,15 +18,15 @@ def start():
         runAsym()
 
 def runSym():
-    choice = input("ecb, CBC or AES-GCM? ")
+    choice = input("ecb, cbc or eax? ")
     if choice.upper() == 'ECB':
-        runECB()
+        run_ecb()
     elif choice.upper() == 'CBC':
-        runCBC()
-    elif choice.upper() == 'AES-GCM':
-        runAES_GCM()
+        run_cbc()
+    elif choice.upper() == 'EAX':
+        run_eax()
 
-def runECB():
+def run_ecb():
     choice = input("e for encrypt, d for decrypt? ")
     if choice.upper() == 'E':
         run_ecb_encrypt()
@@ -54,7 +54,7 @@ def run_ecb_decrypt():
     plaintext = unpad(cipher.decrypt(ciphertext), 16)
     print(plaintext)
     
-def runCBC():
+def run_cbc():
     choice = input("e for encrypt, d for decrypt? ")
     if choice.upper() == 'E':
         run_cbc_encrypt()
@@ -87,24 +87,43 @@ def run_cbc_decrypt():
     plaintext = unpad(cipher.decrypt(ct), AES.block_size)
     print(plaintext)
 
-def runAES_GCM():
-    print("aes-gcm")
-    data = get_file()
-    print("generating AES key")
+def run_eax():
+    choice = input("e for encrypt, d for decrypt? ")
+    if choice.upper() == 'E':
+        run_eax_encrypt()
+    elif choice.upper() == 'D':
+        run_eax_decrypt()
+
+def run_eax_encrypt():
+    print("encrypt file in eax mode")
+    data = get_data()
+    print('generate key: ')
     key = get_random_bytes(16)
+    print('write key to what file? ')
+    write_key(key)
     cipher = AES.new(key, AES.MODE_EAX)
     ciphertext, tag = cipher.encrypt_and_digest(data)
-    print("writing key to key.bin")
-
-
-    print("writing to encrypted.bin")
-    file_out = open("encrypted.bin", "wb")
+    file = input("writing to what file? ")
+    file_out = open(file, "wb")
     [ file_out.write(x) for x in (cipher.nonce, tag, ciphertext) ]
     file_out.close()
+
+def run_eax_decrypt():
+    print('decrypt file in eax mode')
+    key = get_key()
+    file = input('read from what file? ')
+    file_in = open(file, 'rb')
+    nonce, tag, ciphertext = [ file_in.read(x) for x in (16, 16, -1) ]
+    file_in.close()
+    cipher = AES.new(key, AES.MODE_EAX, nonce)
+    data = cipher.decrypt_and_verify(ciphertext, tag)
+    print(data)
 
 def runAsym():
     print("running asym")
 
+
+# helper functions
 
 def get_data():
     data_file = input("indicate file to encrypt/decrypt: ")

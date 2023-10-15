@@ -11,33 +11,46 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Util.number import getPrime
 
 def start():
-    choice = input("s for sym, a for asym: ")
-    if choice.upper() == 'S':
-        runSym()
-    elif choice.upper() == 'A':
-        runAsym()
+    while True:
+        print()
+        choice = input("s for symmetric encryption, a for asymmetric encrpytion, q to quit: ")
+        if choice.upper() == 'S':
+            run_sym()
+        elif choice.upper() == 'A':
+            run_asym()
+        elif choice.upper() == 'Q':
+            break
+        else:
+            print('command not found, please try again.')
 
-def runSym():
-    choice = input("e for ecb, c for cbc, a for eax: ")
+def run_sym():
+    choice = input('Choose mode, e for ecb, c for cbc, a for eax: ')
     if choice.upper() == 'E':
         run_ecb()
     elif choice.upper() == 'C':
         run_cbc()
     elif choice.upper() == 'A':
         run_eax()
+    else:
+        print('command not found, please try again.')
+        run_sym()
 
 def run_ecb():
-    choice = input("e for encrypt, d for decrypt? ")
+    choice = input('e for encrypt, d for decrypt: ')
     if choice.upper() == 'E':
         run_ecb_encrypt()
     elif choice.upper() == 'D':
         run_ecb_decrypt()
+    else:
+        print('command not found, please try again.')
+        run_ecb()
 
 def run_ecb_encrypt():
     print('encrypt file in ecb mode..')
     file = input('indicate file to encrypt: ')
     data = get_binary(file)
-    print("generate key..")
+    ic(data)
+    print('generate key..')
     key = get_random_bytes(32)
     file = input('indicate file to write key: ')
     write_binary(file, key)
@@ -58,11 +71,14 @@ def run_ecb_decrypt():
     ic(plaintext)
     
 def run_cbc():
-    choice = input("e for encrypt, d for decrypt? ")
+    choice = input("e for encrypt, d for decrypt: ")
     if choice.upper() == 'E':
         run_cbc_encrypt()
     elif choice.upper() == 'D':
         run_cbc_decrypt()
+    else:
+        print('command not found, please try again.')
+        run_cbc()
 
 def run_cbc_encrypt():
     print('encrypting file in cbc mode..')
@@ -95,11 +111,14 @@ def run_cbc_decrypt():
     ic(plaintext)
 
 def run_eax():
-    choice = input("e for encrypt, d for decrypt? ")
+    choice = input("e for encrypt, d for decrypt: ")
     if choice.upper() == 'E':
         run_eax_encrypt()
     elif choice.upper() == 'D':
         run_eax_decrypt()
+    else:
+        print('command not found, please try again.')
+        run_eax()
 
 def run_eax_encrypt():
     print('encrypt file in eax mode..')
@@ -128,8 +147,7 @@ def run_eax_decrypt():
     plaintext = cipher.decrypt_and_verify(ciphertext, tag)
     ic(plaintext)
 
-# new functionalities: generation of key-pairs, asymetric encryption and decryption of files
-def runAsym():
+def run_asym():
     choice = input('g for generate rsa-keys, e for encrypt, d for decrypt: ')
     if choice.upper() == 'G':
         generate_keys()
@@ -137,23 +155,13 @@ def runAsym():
         encrypt()
     elif choice.upper() == 'D':
         decrypt()
+    else:
+        print('command not found, please try again.')
+        run_asym()
 
 def generate_keys():
-
-
-    # p = getPrime(255) # for modulus n = 512
-    # q = getPrime(256)
-    # n = p*q
-    # phi = (p-1)*(q-1)
-    # e = 65537
-    # d = pow(e, -1, phi)
-    # ic(d)
-    # cipher = (m**e) % n
-    # plain = (cipher**d) % n
-
     print('generating rsa-key..')
     (n, e, d) = generate_rsa()
-
     private_key = json.dumps({'n': n, 'd': d}) # 'e': e, 'd': d, 'p': p, 'q': q})
     public_key = json.dumps({'n': n, 'e': e})
     ic(private_key)
@@ -164,33 +172,13 @@ def generate_keys():
     file = input('indicate file to write public key: ')
     write_plaintext(file, public_key)
 
-
 def encrypt():
-
     # 1. Receive a public key as an argument
     ########################################
     file = input('indicate file to get public key: ')
     public_key = json.loads(get_plaintext(file))
     n = public_key['n']
     e = public_key['e']
-
-    # #
-    # print('load private key: ')
-    # private_key = json.loads(get_plaintext())
-    # n = private_key['n']
-    # d = private_key['d']
-
-    # alice = MY_RSA()
-
-    # key_sym = get_random_bytes(3)
-    # ic(key_sym)
-    # enc = alice.encrypt(key_sym)
-    # ic(enc)
-    # dec = alice.decrypt(enc)
-    # ic(dec)
-    #
-
-    
 
     # 2. Generate a symmetric key for an AEAD cipher
     ################################################
@@ -208,24 +196,10 @@ def encrypt():
 
     # 4. Encrypt the symmetric key with the public asymetric key
     ############################################################
-    # key_sym_int = struct.unpack('B', key_sym_bytes[0:1])[0]
     key_sym_int = int.from_bytes(key_sym_bytes, byteorder='big', signed=False)
     ic(key_sym_int)
-
     key_sym_encrypted_int = pow(key_sym_int, e, n)
-    # key_sym_encrypted_int = (key_sym_int**e) % n
     ic(key_sym_encrypted_int)
-    # key_sym_encrypted_bytes = struct.pack('B', key_sym_encrypted_int)
-    # key_sym_encrypted_bytes = int.to_bytes(key_sym_encrypted_int, 40, 'big', signed=False)
-    # ic(key_sym_encrypted_bytes)
-
-    # Test decryption
-    #################
-    # key_sym_encrypted_int = int.from_bytes(key_sym_encrypted_bytes, byteorder='big', signed=False)
-    # key_sym_decrypted_int = (key_sym_encrypted_int**d) % n
-    # ic(key_sym_decrypted_int)
-    # key_sym_decrypted_bytes = int.to_bytes(key_sym_decrypted_int, 4, 'big', signed=False)
-    # ic(key_sym_decrypted_bytes)
 
     # 5. Append the encrypted symmetric key and the encrypted body of the file
     # 6. Save this result as the file
@@ -237,17 +211,6 @@ def encrypt():
     file = input('indicate file to write encrypted aead key and encrypted message: ')
     write_plaintext(file, result)
     ic(result)
-
-    # file = input("writing cypher_sym to what file? ")
-    # file_out = open(file, "wb")
-    # [ file_out.write(x) for x in (cipher_sym.nonce, tag, ciphertext) ]
-    # file_out.close()
-    
-    # key_sym_encrypted_bytes = key_sym_encrypted.to_bytes(16, byteorder='big')
-    # ic(key_sym_encrypted_bytes)
-    # print('write encrypted sym key: ')
-    # write_binary(key_sym_encrypted_bytes)
-    
 
 def decrypt():
     # 1. Receive a private key as an argument
@@ -287,11 +250,16 @@ def decrypt():
     write_binary(file, data)
 
 # helper functions
+##################
 def get_plaintext(file):
-    file_in = open(file, "r")
-    result = file_in.read()
-    file_in.close()
-    return result
+    try:
+        with open(file, 'r') as file_in:
+            contents = file_in.read()
+        return contents
+    except FileNotFoundError:
+        new_file = input('file does not exist, please try again: ')
+        contents = get_binary(new_file)
+        return contents
 
 def write_plaintext(file, result):
     file_out = open(file, 'w')
@@ -299,14 +267,16 @@ def write_plaintext(file, result):
     file_out.close()
 
 def get_binary(file):
-    # key_file = input("indicate name of the file: ")
-    file_in = open(file, "rb")
-    key = file_in.read()
-    file_in.close()
-    return key
-
+    try:
+        with open(file, 'rb') as file_in:
+            contents = file_in.read()
+        return contents
+    except FileNotFoundError:
+        new_file = input('file does not exist, please try again: ')
+        contents = get_binary(new_file)
+        return contents
+        
 def write_binary(file, key):
-    # key_file = input('name of the file: ')
     file_out = open(file, 'wb')
     file_out.write(key)
     file_out.close()
@@ -321,7 +291,6 @@ def generate_rsa(key_length=DEFAULT_MODULUS_LEN, exponent=DEFAULT_EXPONENT):
     p = q = 2
 
     while gcd(e, t) != 1:
-        # just use getPrime or the one from original??
         p = getPrime(k // 2) 
         q = getPrime(k // 2)
         t = lcm(p - 1, q - 1)

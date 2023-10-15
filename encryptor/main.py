@@ -58,7 +58,6 @@ def run_ecb_encrypt():
     ciphertext = cipher.encrypt(pad(data, 16))
     file = input('indicate file to write encrypted message: ')
     write_binary(file, ciphertext)
-    ic(ciphertext)
 
 def run_ecb_decrypt():
     print('decrypt file in ecb mode..')
@@ -84,6 +83,7 @@ def run_cbc_encrypt():
     print('encrypting file in cbc mode..')
     file = input('indicate file to encrypt: ')
     data = get_binary(file)
+    ic(data)
     print('generating key..')
     key = get_random_bytes(16)
     file = input('indicate file to write key: ')
@@ -93,7 +93,6 @@ def run_cbc_encrypt():
     iv = b64encode(cipher.iv).decode('utf-8')
     ct = b64encode(ct_bytes).decode('utf-8')
     result = json.dumps({'iv': iv, 'ciphertext': ct})
-    ic(result)
     file = input('indicate file to write encrypted message: ')
     write_plaintext(file, result)
 
@@ -109,6 +108,8 @@ def run_cbc_decrypt():
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = unpad(cipher.decrypt(ct), AES.block_size)
     ic(plaintext)
+    file = input('indicate file to write decrypted message: ')
+    write_binary(file, plaintext)
 
 def run_eax():
     choice = input("e for encrypt, d for decrypt: ")
@@ -124,6 +125,7 @@ def run_eax_encrypt():
     print('encrypt file in eax mode..')
     file = input('indicate file to encrypt: ')
     data = get_binary(file)
+    ic(data)
     print('generating key..')
     key = get_random_bytes(16)
     file = input('indicate file to write key: ')
@@ -183,23 +185,20 @@ def encrypt():
     # 2. Generate a symmetric key for an AEAD cipher
     ################################################
     print('generating aead key..')
-    key_sym_bytes = get_random_bytes(16)
-    ic(key_sym_bytes)
-    cipher_sym = AES.new(key_sym_bytes, AES.MODE_EAX)
+    aead_bytes = get_random_bytes(16)
+    cipher_sym = AES.new(aead_bytes, AES.MODE_EAX)
     
     # 3. Encrypt the body of the file with the symmetric AEAD cipher
     ################################################################
     file = input('indicate file to encrypt with aead key: ')
     data = get_binary(file)
-    # data = b'hello world'
+    ic(data)
     ciphertext, tag = cipher_sym.encrypt_and_digest(data)
 
     # 4. Encrypt the symmetric key with the public asymetric key
     ############################################################
-    key_sym_int = int.from_bytes(key_sym_bytes, byteorder='big', signed=False)
-    ic(key_sym_int)
-    key_sym_encrypted_int = pow(key_sym_int, e, n)
-    ic(key_sym_encrypted_int)
+    aead_int = int.from_bytes(aead_bytes, byteorder='big', signed=False)
+    aead_int_encrypted = pow(aead_int, e, n)
 
     # 5. Append the encrypted symmetric key and the encrypted body of the file
     # 6. Save this result as the file
@@ -207,10 +206,9 @@ def encrypt():
     ct = b64encode(ciphertext).decode('utf-8')
     tag = b64encode(tag).decode('utf-8')
     nonce = b64encode(cipher_sym.nonce).decode('utf-8')
-    result = json.dumps({'aead_key': str(key_sym_encrypted_int), 'ciphertext': ct, 'tag': tag, 'nonce': nonce})
+    result = json.dumps({'aead_key': str(aead_int_encrypted), 'ciphertext': ct, 'tag': tag, 'nonce': nonce})
     file = input('indicate file to write encrypted aead key and encrypted message: ')
     write_plaintext(file, result)
-    ic(result)
 
 def decrypt():
     # 1. Receive a private key as an argument
@@ -229,11 +227,9 @@ def decrypt():
     tag = b64decode(b64['tag'])
     nonce = b64decode(b64['nonce'])
     aead_encrypted = int(b64['aead_key'])
-    ic(aead_encrypted)
 
     # 3. Decrypt the symmetric key with the private asymmetric key
     ##############################################################
-    # aead_int = (aead_encrypted**d) % n
     print('decrypting aead key..')
     aead_int = pow(aead_encrypted, d, n)
     aead_bytes = int.to_bytes(aead_int, 16, 'big', signed=False)
@@ -244,9 +240,8 @@ def decrypt():
     print('decrypting message with aead key..')
     cipher = AES.new(aead_bytes, AES.MODE_EAX, nonce)
     data = cipher.decrypt_and_verify(ciphertext, tag)
-
-    file = input('indicate file to write decrypted message: ')
     ic(data)
+    file = input('indicate file to write decrypted message: ')
     write_binary(file, data)
 
 # helper functions

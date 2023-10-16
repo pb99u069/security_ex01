@@ -1,11 +1,13 @@
 Steps: 
-Download Nix with $ sh <(curl -L https://nixos.org/nix/install) --no-daemon
-Since flakes are an experimental feature, you also need to add the following line to ~/.config/nix/nix.conf:
-experimental-features = nix-command flakes
-or pass the flag --experimental-features 'nix-command flakes' whenever you call the nix command.
 
-enter the environment with all necessary dependencies:
-$ nix develop --experimental-features 'nix-command flakes'
+Download nix with:
 
-run the program:
+$ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+
+Enter the environment with dependencies with:
+
+$ nix develop
+
+Run the program:
+
 $ nix run

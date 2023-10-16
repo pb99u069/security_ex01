@@ -4,5 +4,8 @@ Since flakes are an experimental feature, you also need to add the following lin
 experimental-features = nix-command flakes
 or pass the flag --experimental-features 'nix-command flakes' whenever you call the nix command.
 
-call nix develop
-nix run
+enter the environment with all necessary dependencies:
+$ nix develop --experimental-features 'nix-command flakes'
+
+run the program:
+$ nix run

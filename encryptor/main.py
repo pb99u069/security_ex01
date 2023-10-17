@@ -13,7 +13,7 @@ from Crypto.Util.number import getPrime
 def start():
     while True:
         print()
-        choice = input("s for symmetric encryption, a for asymmetric encrpytion, q to quit: ")
+        choice = input("Choose s for symmetric encryption, a for asymmetric encrpytion, q to quit: ")
         if choice.upper() == 'S':
             run_sym()
         elif choice.upper() == 'A':
@@ -36,7 +36,7 @@ def run_sym():
         run_sym()
 
 def run_ecb():
-    choice = input('e for encrypt, d for decrypt: ')
+    choice = input('Choose e for encryption, d for decryption: ')
     if choice.upper() == 'E':
         run_ecb_encrypt()
     elif choice.upper() == 'D':
@@ -46,11 +46,11 @@ def run_ecb():
         run_ecb()
 
 def run_ecb_encrypt():
-    print('encrypt file in ecb mode..')
+    print('encrypting file in ecb mode..')
     file = input('indicate file to encrypt: ')
     data = get_binary(file)
     ic(data)
-    print('generate key..')
+    print('generating key..')
     key = get_random_bytes(32)
     file = input('indicate file to write key: ')
     write_binary(file, key)
@@ -60,7 +60,7 @@ def run_ecb_encrypt():
     write_binary(file, ciphertext)
 
 def run_ecb_decrypt():
-    print('decrypt file in ecb mode..')
+    print('decrypting file in ecb mode..')
     file = input('indicate file to get key: ')
     key = get_binary(file)
     file = input('indicate file to get encrypted message: ')
@@ -70,7 +70,7 @@ def run_ecb_decrypt():
     ic(plaintext)
     
 def run_cbc():
-    choice = input("e for encrypt, d for decrypt: ")
+    choice = input("Choose e for encryption, d for decryption: ")
     if choice.upper() == 'E':
         run_cbc_encrypt()
     elif choice.upper() == 'D':
@@ -97,7 +97,7 @@ def run_cbc_encrypt():
     write_plaintext(file, result)
 
 def run_cbc_decrypt():
-    print('decrypt file in cbc mode..')
+    print('decrypting file in cbc mode..')
     file = input('indicate file to get key: ')
     key = get_binary(file)
     file = input('indicate file to get encrypted message: ')
@@ -112,7 +112,7 @@ def run_cbc_decrypt():
     write_binary(file, plaintext)
 
 def run_eax():
-    choice = input("e for encrypt, d for decrypt: ")
+    choice = input("Choose e for encryption, d for decryption: ")
     if choice.upper() == 'E':
         run_eax_encrypt()
     elif choice.upper() == 'D':
@@ -122,7 +122,7 @@ def run_eax():
         run_eax()
 
 def run_eax_encrypt():
-    print('encrypt file in eax mode..')
+    print('encrypting file in eax mode..')
     file = input('indicate file to encrypt: ')
     data = get_binary(file)
     ic(data)
@@ -138,7 +138,7 @@ def run_eax_encrypt():
     file_out.close()
 
 def run_eax_decrypt():
-    print('decrypt file in eax mode..')
+    print('decrypting file in eax mode..')
     file = input('indicate file to get key: ')
     key = get_binary(file)
     file = input('indicate file to get encrypted message: ')
@@ -150,7 +150,7 @@ def run_eax_decrypt():
     ic(plaintext)
 
 def run_asym():
-    choice = input('g for generate rsa-keys, e for encrypt, d for decrypt: ')
+    choice = input('Choose g to generate rsa-keys, e for encryption, d for decryption: ')
     if choice.upper() == 'G':
         generate_keys()
     elif choice.upper() == 'E':
@@ -276,10 +276,10 @@ def write_binary(file, key):
     file_out.write(key)
     file_out.close()
 
-DEFAULT_EXPONENT = 65537
-DEFAULT_MODULUS_LEN = 2048
+EXPONENT = 65537
+MODULUS = 2048
 
-def generate_rsa(key_length=DEFAULT_MODULUS_LEN, exponent=DEFAULT_EXPONENT):
+def generate_rsa(key_length=MODULUS, exponent=EXPONENT):
     e = exponent
     k = key_length
     t = 0
@@ -293,11 +293,9 @@ def generate_rsa(key_length=DEFAULT_MODULUS_LEN, exponent=DEFAULT_EXPONENT):
     n = p * q
     d = invmod(e, t)
     return(n, e, d)
-    
+
+# Extended Euclidean Algorithm    
 def exgcd(a, b):
-    """Extended Euclidean Algorithm that can give back all gcd, s, t 
-    such that they can make Bézout's identity: gcd(a,b) = a*s + b*t
-    Return: (gcd, s, t) as tuple"""
     old_s, s = 1, 0
     old_t, t = 0, 1
     while b:
@@ -307,9 +305,8 @@ def exgcd(a, b):
         a, b = b, a % b
     return a, old_s, old_t
 
+# Modular multiplicative inverse of the public key e with respect to the modulus m
 def invmod(e, m):
-    """Find out the modular multiplicative inverse x of the input integer
-    e with respect to the modulus m. Return the minimum positive x"""
     g, x, y = exgcd(e, m)
     assert g == 1
 
@@ -319,12 +316,12 @@ def invmod(e, m):
         x += m
     return x
 
+# Greates common divisor
 def gcd(a, b):
-    '''Computes the Great Common Divisor using the Euclid's algorithm'''
     while b:
         a, b = b, a % b
     return a
 
+#Lowes Common Multiple
 def lcm(a, b):
-    """Computes the Lowest Common Multiple using the GCD method."""
     return a // gcd(a, b) * b
